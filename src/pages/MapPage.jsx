@@ -56,11 +56,23 @@ export function MapPage({ fod, data, setF, triggerKey }) {
     sorted.forEach(r => {
       const o = C[r.origin], d = C[r.dest]; if (!o || !d || r.origin === r.dest) return;
       used.add(r.origin); used.add(r.dest);
-      const w = 1 + (r.val / maxV) * 8; const op = 0.3 + (r.val / maxV) * 0.6;
-      const line = L.polyline([o, d], { color: '#f59e0b', weight: w, opacity: op });
+      
+      // Hitung properti visual dinamis berdasarkan rasio traffic
+      const ratio = Math.min(1, Math.max(0, r.val / maxV));
+      // Ketebalan: makin tinggi traffic makin tebal (dari 1px sampai 14px)
+      const w = 1 + Math.pow(ratio, 0.6) * 13;
+      // Transparansi: makin sedikit makin transparan (0.15), makin banyak makin pekat (0.95)
+      const op = 0.15 + Math.pow(ratio, 0.5) * 0.8;
+      // Kepekatan warna kuning/amber
+      let col = '#fde68a'; // kuning muda tipis & transparan untuk traffic rendah
+      if (ratio > 0.6) col = '#d97706';      // kuning pekat / amber tua untuk traffic tinggi
+      else if (ratio > 0.3) col = '#f59e0b'; // amber standar
+      else if (ratio > 0.1) col = '#fbbf24'; // kuning sedang
+
+      const line = L.polyline([o, d], { color: col, weight: w, opacity: op });
       line.bindTooltip(`<b>${r.origin}</b> → <b>${r.dest}</b><br/>${fmtN(r.val)} trx`, { className: 'od-tt' });
-      line.on('mouseover', e => e.target.setStyle({ color: '#008f81', opacity: 1 }));
-      line.on('mouseout', e => e.target.setStyle({ color: '#f59e0b', opacity: op }));
+      line.on('mouseover', e => e.target.setStyle({ color: '#008f81', opacity: 1, weight: Math.max(w + 2, 4) }));
+      line.on('mouseout', e => e.target.setStyle({ color: col, opacity: op, weight: w }));
       line.on('click', () => setF(s => ({ ...s, origin: r.origin, dest: r.dest })));
       lg.addLayer(line);
     });
