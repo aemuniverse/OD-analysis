@@ -1,22 +1,54 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import * as L from 'leaflet';
-import { aggregate, corridorOf } from '../utils/aggregate';
+import { aggregate } from '../utils/aggregate';
 import { fmtN } from '../utils/format';
 import { KpiCard } from '../components/KpiCard';
+import { RUAS_PATHS, RUAS_DEFS } from '../data/od_data_generator';
+
+const RUAS_COLOR = '#dc2626';
 
 export function MapPage({ fod, data, setF, triggerKey }) {
-  const mapRef = useRef(); const layerRef = useRef(); const inst = useRef();
+  const mapRef = useRef(); const layerRef = useRef(); const ruasRef = useRef(); const inst = useRef();
   const ag = useMemo(() => aggregate(fod), [fod]);
   const [topN, setTopN] = useState(40);
   const sorted = useMemo(() => [...fod].sort((a, b) => b.val - a.val).slice(0, topN), [fod, topN]);
   const maxV = Math.max(1, ...fod.map(r => r.val));
 
+  // Compute map center & zoom from data
+  const bounds = useMemo(() => {
+    const coords = Object.values(data.coords);
+    if (coords.length === 0) return { center: [0.5, 102], zoom: 5 };
+    const lats = coords.map(c => c[0]);
+    const lngs = coords.map(c => c[1]);
+    return {
+      sw: [Math.min(...lats) - 0.5, Math.min(...lngs) - 0.5],
+      ne: [Math.max(...lats) + 0.5, Math.max(...lngs) + 0.5],
+    };
+  }, [data.coords]);
+
   useEffect(() => {
-    inst.current = L.map(mapRef.current, { zoomControl: true, attributionControl: false }).setView([3.45, 99.0], 9);
+    inst.current = L.map(mapRef.current, { zoomControl: true, attributionControl: false }).setView([0.5, 102.0], 5);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18 }).addTo(inst.current);
+    ruasRef.current = L.layerGroup().addTo(inst.current);
     layerRef.current = L.layerGroup().addTo(inst.current);
+
+    // Draw HKA ruas network
+    Object.entries(RUAS_PATHS).forEach(([code, path]) => {
+      if (path.length < 2) return;
+      const line = L.polyline(path, { color: RUAS_COLOR, weight: 3, opacity: 0.5, dashArray: '6 4' });
+      line.bindTooltip(`<b>${RUAS_DEFS[code]?.label || code}</b><br/>${RUAS_DEFS[code]?.km || '?'} Km`, { className: 'od-tt', sticky: true });
+      ruasRef.current.addLayer(line);
+    });
+
     return () => inst.current.remove();
   }, []);
+
+  // Fit bounds when data changes
+  useEffect(() => {
+    if (inst.current && bounds.sw) {
+      inst.current.fitBounds([bounds.sw, bounds.ne], { padding: [30, 30], maxZoom: 12 });
+    }
+  }, [bounds]);
 
   useEffect(() => {
     const lg = layerRef.current; if (!lg || !inst.current) return;
@@ -53,8 +85,8 @@ export function MapPage({ fod, data, setF, triggerKey }) {
 
       <div className="panel" style={{ marginBottom: 20 }}>
         <div className="head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className="head-left"><h3>Desire Line Spasial Mapping</h3><p>Visualisasi pembebanan jalan tol</p></div>
-          <div className="fl" style={{ minWidth: 200 }}><label>Top N Aliran: {topN}</label><input type="range" min="10" max={fod.length} value={topN} onChange={e => setTopN(+e.target.value)} /></div>
+          <div className="head-left"><h3>Desire Line Spasial Mapping – Seluruh HKA</h3><p>Visualisasi pembebanan jalan tol seluruh wilayah operasional</p></div>
+          <div className="fl" style={{ minWidth: 200 }}><label>Top N Aliran: {topN}</label><input type="range" min="10" max={Math.max(fod.length, 10)} value={topN} onChange={e => setTopN(+e.target.value)} /></div>
         </div>
         <div style={{ position: 'relative' }}><div id="map" ref={mapRef} /></div>
       </div>

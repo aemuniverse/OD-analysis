@@ -1,15 +1,70 @@
 import React from 'react';
+import { SEGMENT_LIST, getAvailableMonths, getAvailableYears, monthLabel, DATE_RANGE } from '../data/od_data_generator';
 
-export function FilterBar({ f, setF, origins, dests, maxTrx, reset, activeChips }) {
+const TF_OPTS = [
+  { id: 'daily', label: 'Harian' },
+  { id: 'monthly', label: 'Bulanan' },
+  { id: 'yearly', label: 'Tahunan' },
+];
+
+export function FilterBar({
+  f, setF, origins, dests, maxTrx, reset, activeChips,
+  timeframe, setTimeframe,
+  selectedDate, setSelectedDate,
+  selectedMonth, setSelectedMonth,
+  selectedYear, setSelectedYear,
+}) {
+  const months = getAvailableMonths();
+  const years = getAvailableYears();
+
   return (
     <div className="filters">
+      {/* Timeframe row */}
       <div className="fl">
-        <label>Cari / Gerbang Keluar</label>
+        <label>Timeframe</label>
+        <div className="tf-tabs">
+          {TF_OPTS.map(t => (
+            <button key={t.id} className={'tf-btn' + (timeframe === t.id ? ' on' : '')}
+              onClick={() => setTimeframe(t.id)}>{t.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="fl">
+        <label>Periode</label>
+        {timeframe === 'daily' && (
+          <input type="date" className="fl-date" value={selectedDate}
+            min={DATE_RANGE.start} max={DATE_RANGE.end}
+            onChange={e => setSelectedDate(e.target.value)} />
+        )}
+        {timeframe === 'monthly' && (
+          <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
+            {months.map(m => <option key={m} value={m}>{monthLabel(m)}</option>)}
+          </select>
+        )}
+        {timeframe === 'yearly' && (
+          <select value={selectedYear} onChange={e => setSelectedYear(e.target.value)}>
+            {years.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+        )}
+      </div>
+
+      <div className="fl">
+        <label>Ruas / Segmen</label>
+        <select value={f.segment} onChange={e => setF(s => ({ ...s, segment: e.target.value }))}>
+          <option value="ALL">Semua Ruas</option>
+          {SEGMENT_LIST.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+        </select>
+      </div>
+
+      <div className="fl">
+        <label>Gerbang Keluar</label>
         <select value={f.dest} onChange={e => setF(s => ({ ...s, dest: e.target.value }))}>
           <option value="ALL">Semua Gerbang</option>
           {dests.map(d => <option key={d}>{d}</option>)}
         </select>
       </div>
+
       <div className="fl">
         <label>Gerbang Asal</label>
         <select value={f.origin} onChange={e => setF(s => ({ ...s, origin: e.target.value }))}>
@@ -17,6 +72,7 @@ export function FilterBar({ f, setF, origins, dests, maxTrx, reset, activeChips 
           {origins.map(d => <option key={d}>{d}</option>)}
         </select>
       </div>
+
       <div className="fl">
         <label>Metode Bayar</label>
         <select value={f.bank} onChange={e => setF(s => ({ ...s, bank: e.target.value }))}>
@@ -27,10 +83,12 @@ export function FilterBar({ f, setF, origins, dests, maxTrx, reset, activeChips 
           <option>BCA</option>
         </select>
       </div>
+
       <div className="fl">
         <label>Min Volume (<span className="rv">≥ {f.min}</span>)</label>
         <input type="range" min="0" max={maxTrx} value={f.min} onChange={e => setF(s => ({ ...s, min: +e.target.value }))} />
       </div>
+
       <div className="chipbar">
         {activeChips.map(([k, v, clr], i) => (
           <span key={i} className="chip">

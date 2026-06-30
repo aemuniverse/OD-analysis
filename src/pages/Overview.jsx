@@ -36,7 +36,7 @@ export function Overview({ fod, data, setF, setPage, triggerKey }) {
       <div className="kpis">
         <KpiCard lab="TOTAL REVENUE" num={revNum} formatter="rp" trend="+8.4%" triggerKey={triggerKey} />
         <KpiCard lab="TOTAL VOLUME TRIP" num={ag.total} formatter="num" suffix=" Trx" trend="+5.1%" triggerKey={triggerKey} />
-        <KpiCard lab="ACTIVE ORIGIN GATES" num={ag.prod.length} formatter="num" suffix=" / 36" trend="+2 zona" triggerKey={triggerKey} />
+        <KpiCard lab="ACTIVE ORIGIN GATES" num={ag.prod.length} formatter="num" suffix={` / ${Object.keys(data.coords || {}).length}`} trend="+2 zona" triggerKey={triggerKey} />
         <KpiCard lab="DEMAND CONCENTRATION" num={Math.round(ag.conc * 100)} formatter="pct" suffix="%" trend="-1.2%" isDown triggerKey={triggerKey} />
       </div>
 
@@ -45,7 +45,7 @@ export function Overview({ fod, data, setF, setPage, triggerKey }) {
           <div className="head">
             <div className="head-left">
               <h3>Produksi & Atraksi Perjalanan Console</h3>
-              <p>Agregat demand asal dan tujuan per gerbang tol (36 gerbang aktif)</p>
+              <p>Agregat demand asal dan tujuan per gerbang tol ({Object.keys(data.coords || {}).length} gerbang aktif)</p>
             </div>
             <div className="head-ico">{icoFilter}</div>
           </div>
@@ -115,7 +115,7 @@ export function Overview({ fod, data, setF, setPage, triggerKey }) {
             <li><span className="mk">2</span><span>Struktur pendapatan e-toll menyumbang &gt;99% keseluruhan cashflow gerbang.</span></li>
             <li><span className="mk">3</span><span>Konsentrasi demand yang sehat mendukung perluasan gerbang Tebing Tinggi 2.</span></li>
           </ul>
-          <div className="note">Sistem transaksi tertutup ATT6 Trans-Sumatra Q2 2026.</div>
+          <div className="note">Wilayah operasional HKA Trans-Sumatera · {data.date}</div>
         </div>
       </div>
     </>

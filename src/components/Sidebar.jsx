@@ -35,7 +35,7 @@ export function Sidebar({ page, setPage, date }) {
           <div className="brand-symbol">OD</div>
           <div className="brand-text">
             <h1>OD MATRIX</h1>
-            <p>REGULATORY COCKPIT</p>
+            <p>HKA REGULATORY COCKPIT</p>
           </div>
         </div>
       </div>
@@ -61,7 +61,7 @@ export function Sidebar({ page, setPage, date }) {
           <div className="sb-avatar">AV</div>
           <div className="sb-userinfo">
             <p>Admin Validator</p>
-            <span>Admin · {date}</span>
+            <span>Admin · {typeof date === 'string' && date.includes('—') ? date.split('—')[0].trim().slice(0,7) : date}</span>
           </div>
           <div className="sb-logout" title="Keluar sistem">{icoLogout}</div>
         </div>

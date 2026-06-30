@@ -8,6 +8,11 @@ export const fmtRp = n => {
 };
 export const fmtDate = s => {
   if (!s || typeof s !== 'string') return '-';
+  // Handle date ranges like "2025-06-01 — 2025-06-30"
+  if (s.includes('—')) {
+    const parts = s.split('—').map(p => p.trim());
+    return fmtDate(parts[0]) + ' — ' + fmtDate(parts[1]);
+  }
   const [y, m, d] = s.split('-');
   const M = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   return `${+d} ${M[+m - 1]} ${y}`;

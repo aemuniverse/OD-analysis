@@ -10,12 +10,14 @@ export function buildSystemPrompt(data) {
   const topOrigins = Object.entries(byOrigin).sort((a, b) => b[1] - a[1]).slice(0, 10);
   const byDest = {}; data.od.forEach(r => { byDest[r.dest] = (byDest[r.dest] || 0) + r.traffic; });
   const topDests = Object.entries(byDest).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const gateCount = Object.keys(data.coords || {}).length;
   
-  return `Kamu adalah OD AI, asisten analitik untuk OD Matrix Tol Trans-Sumatra. Jawab dalam Bahasa Indonesia profesional.
+  return `Kamu adalah OD AI, asisten analitik untuk OD Matrix Tol HKA Trans-Sumatera. Jawab dalam Bahasa Indonesia profesional.
 
 DATA AKTIF (${data.date}):
 Total Transaksi: ${totalTrx.toLocaleString('id-ID')} | Total Pendapatan: Rp ${totRev.toLocaleString('id-ID')}
-OD Pair Aktif: ${data.od.filter(r => r.traffic > 0).length} | Tarif Rata-rata: Rp ${Math.round(totRev / totalTrx).toLocaleString('id-ID')}
+OD Pair Aktif: ${data.od.filter(r => r.traffic > 0).length} | Gerbang Aktif: ${gateCount} | Tarif Rata-rata: Rp ${totalTrx > 0 ? Math.round(totRev / totalTrx).toLocaleString('id-ID') : '0'}
+Cakupan: Seluruh wilayah operasional HKA (Banda Aceh – Lampung – JORR-S/ATP Jakarta)
 
 PENDAPATAN PER GERBANG:
 ${gateRevStr}
@@ -26,7 +28,7 @@ ${topPairsStr}
 TOP 10 GERBANG ASAL: ${topOrigins.map((e, i) => `${i + 1}.${e[0]}:${e[1]}`).join(' ')}
 TOP 8 GERBANG TUJUAN: ${topDests.map((e, i) => `${i + 1}.${e[0]}:${e[1]}`).join(' ')}
 
-BANK: Mandiri:${bankTotals.mandiri}(${(bankTotals.mandiri / totalTrx * 100).toFixed(1)}%) BRI:${bankTotals.bri}(${(bankTotals.bri / totalTrx * 100).toFixed(1)}%) BNI:${bankTotals.bni}(${(bankTotals.bni / totalTrx * 100).toFixed(1)}%) BCA:${bankTotals.bca}(${(bankTotals.bca / totalTrx * 100).toFixed(1)}%)
+BANK: Mandiri:${bankTotals.mandiri}(${totalTrx > 0 ? (bankTotals.mandiri / totalTrx * 100).toFixed(1) : 0}%) BRI:${bankTotals.bri}(${totalTrx > 0 ? (bankTotals.bri / totalTrx * 100).toFixed(1) : 0}%) BNI:${bankTotals.bni}(${totalTrx > 0 ? (bankTotals.bni / totalTrx * 100).toFixed(1) : 0}%) BCA:${bankTotals.bca}(${totalTrx > 0 ? (bankTotals.bca / totalTrx * 100).toFixed(1) : 0}%)
 
 DATA OD LENGKAP: ${data.od.filter(r => r.traffic > 0).map(r => `${r.origin}→${r.dest}:${r.traffic}`).join(' ')}
 

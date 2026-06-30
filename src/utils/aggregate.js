@@ -1,25 +1,12 @@
-export const RUAS_LABEL = {
-  HMW: 'Helvetia-Marelan-Binjai',
-  BINSA: 'Binjai-Stabat',
-  MEBI: 'Medan-Binjai',
-  BELMERA: 'Belmera',
-  MKTT: 'Kualanamu-Tebing Tinggi',
-  INKIS: 'Indrapura-Kisaran'
-};
+import { GATE_DEFS, RUAS_DEFS } from '../data/od_data_generator';
 
-export const REGION = {
-  'KUALANAMU': 'Bandara/Timur', 'KEMIRI': 'Bandara/Timur', 'LUBUK PAKAM': 'Deli Serdang',
-  'PERBAUNGAN': 'Serdang Bedagai', 'TELUK MENGKUDU': 'Serdang Bedagai', 'SEI RAMPAH': 'Serdang Bedagai',
-  'TEBING TINGGI': 'Tebing Tinggi', 'TEBING TINGGI 2': 'Tebing Tinggi', 'BELAWAN': 'Medan Utara',
-  'MABAR 1': 'Medan Utara', 'TANJUNG MULIA': 'Medan Utara', 'MARELAN': 'Medan Utara',
-  'BANDAR SELAMAT 4': 'Medan Kota', 'AMPLAS': 'Medan Kota', 'TANJUNG MORAWA': 'Medan Kota',
-  'H. ANIF 1': 'Medan Kota', 'HELVETIA': 'Medan Barat', 'SEMAYANG': 'Medan Barat',
-  'BINJAI': 'Binjai', 'BINJAI UTAMA': 'Binjai', 'STABAT': 'Langkat',
-  'KUALA BINGAI': 'Langkat', 'PANGKALAN BRANDAN': 'Langkat', 'TANJUNG PURA': 'Langkat',
-  'INDRAPURA': 'Batubara', 'KUALA TANJUNG': 'Batubara', 'DOLOK MERAWAN': 'Serdang Bedagai',
-  'SINAKSAK': 'Simalungun', 'SIMPANG PANEI': 'Simalungun', 'LIMA PULUH': 'Batubara',
-  'KISARAN': 'Asahan'
-};
+export const RUAS_LABEL = Object.fromEntries(
+  Object.entries(RUAS_DEFS).map(([code, def]) => [code, def.label])
+);
+
+export const REGION = Object.fromEntries(
+  Object.entries(GATE_DEFS).map(([name, def]) => [name, def.region])
+);
 
 export const corridorOf = (o, d) => (REGION[o] || 'Lainnya') + ' → ' + (REGION[d] || d);
 
